@@ -1,0 +1,48 @@
+:root {
+  --primary: #d20a0a;
+}
+
+@font-face {
+  font-family: 'Sternbach';
+  src: url("/fonts/Sternbach.otf") format("opentype");
+}
+
+/* Police en gras */
+@font-face {
+  font-family: 'Sternbach';
+  src: url('/fonts/Sternbach-Bold.otf') format('opentype');
+  font-weight: bold;
+  font-style: normal;
+}
+
+/* Police italique */
+@font-face {
+  font-family: 'Sternbach';
+  src: url('/fonts/Sternbach-Italic.otf') format('opentype');
+  font-weight: normal;
+  font-style: italic;
+}
+
+/* Police en gras italique */
+@font-face {
+  font-family: 'Sternbach';
+  src: url('/fonts/Sternbach-Bold-Italic.otf') format('opentype');
+  font-weight: bold;
+  font-style: italic;
+}
+
+html {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0; 
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Sternbach';
+  background-color: black;
+  overflow: hidden;
+}
+

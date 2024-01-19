@@ -1,0 +1,105 @@
+{
+  "environment": "STAGING",
+  "fighters": [ 
+    {
+      "name": "Alexandre 'The great' Volkanovski",
+      "fighterImage": "/fighters/volkanovski.jpeg",
+      "age": 33,
+      "record": "33 - 1",
+      "weight": "155",
+      "stance": "Orthodox",
+      "fights": [
+        {
+          "fightImage": "/fights/volk-holloway.png",
+          "fighter": "Alexandre 'The great' Volkanovski",
+          "opponent": "Max 'Blessed' Holloway"
+        },
+        {
+          "fightImage": "/fights/volk-zombie.jpeg",
+          "fighter": "Alexandre 'The great' Volkanovski",
+          "opponent": "Jun Chan Sung 'The Korean Zombie'"
+        }
+      ]
+    },
+    {
+      "name": "Jon 'Bones' Jones",
+      "fighterImage": "/fighters/jon-jones.png",
+      "age": 34,
+      "record": "26 - 1 - 1",
+      "weight": "205",
+      "stance": "Switch",
+      "fights": [
+        {
+          "fightImage": "/fights/jones-gane.png",
+          "fighter": "Jon Jones",
+          "opponent": "Cyril 'Bon gamin' Gane"
+        },
+        {
+          "fightImage": "/fights/jones-cormier.jpeg",
+          "fighter": "Jon Jones",
+          "opponent": "Danier Cormier"
+        }
+      ]
+    },
+    {
+      "name": "Conor 'The Notorious' McGregor",
+      "fighterImage": "/fighters/conor-mcgregor.jpg",
+      "age": 33,
+      "record": "22 - 6",
+      "weight": "155",
+      "stance": "Southpaw",
+      "fights": [
+        {
+          "fightImage": "/fights/mcg-aldo.webp",
+          "fighter": "Conor 'The Notorious' McGregor",
+          "opponent": "José Aldo"
+        },
+        {
+          "fightImage": "/fights/mcg-alvarez.jpeg",
+          "fighter": "Conor 'The Notorious' McGregor",
+          "opponent": "Eddie Alvarez"
+        }
+      ]
+    },
+    {
+      "name": "George 'Rush' St-Pierre",
+      "fighterImage": "/fighters/gsp.webp",
+      "age": 40,
+      "record": "26 - 2",
+      "weight": "170",
+      "stance": "Orthodox",
+      "fights": [
+        {
+          "fightImage": "/fights/gsp-bisping.jpeg",
+          "fighter": "George 'Rush' St-Pierre",
+          "opponent": "Michael Bisping"
+        },
+        {
+          "fightImage": "/fights/gsp-hendricks.jpeg",
+          "fighter": "George 'Rush' St-Pierre",
+          "opponent": "Johny Hendricks"
+        }
+      ]
+    },
+    {
+      "name": "Alex 'Poatan' Pereira",
+      "fighterImage": "/fighters/alex-pereira.png",
+      "age": 34,
+      "record": "47 - 7 - 1",
+      "weight": "185",
+      "stance": "Orthodox",
+      "fights": [
+        {
+          "fightImage": "/fights/pereira-prochazka.jpeg",
+          "fighter": "Alex 'Poatan' Pereira",
+          "opponent": "Jiri Prochazka"
+        },
+        {
+          "fightImage": "/fights/pereira-adesanya.jpeg",
+          "fighter": "Alex 'Poatan' Pereira",
+          "opponent": "Israel 'The Last Stylebender' Adesanya"
+        }
+      ]
+    }
+  ]
+}

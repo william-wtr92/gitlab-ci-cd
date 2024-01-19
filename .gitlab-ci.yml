@@ -1,0 +1,194 @@
+include:
+  - template: Auto-DevOps.gitlab-ci.yml
+
+variables:
+  TEST_DISABLED: 1
+  STAGING_CTN_NAME: m1-ci-cd-staging
+  STAGING_URL: http://localhost:3001/
+  PROD_URL: https://m1-ci-cd-william-wtr92-b23c1a4222838f3c3110a4cf3f809745294028d2.gitlab.io
+  ZAP_CTN_NAME: m1-ci-cd-zapscan
+  ZAP_URL: http://host.docker.internal:3002/
+
+test:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: $CI_COMMIT_BRANCH == "develop"
+      when: never
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: never
+
+build:
+  rules:
+    - changes:
+        - public/**/*
+        - src/**/*
+        - data/**/*
+        - Dockerfile
+        - .dockerignore
+        - package.json
+  allow_failure: false
+
+e2e-tests:
+  stage: test
+  image: mcr.microsoft.com/playwright:v1.40.0-jammy
+  script:
+    - npm install
+    - npm run test:e2e
+  rules:
+    - if: '$CI_PIPELINE_SOURCE != "merge_request_event"'
+      when: always
+  allow_failure: false
+
+semgrep-sast:
+  allow_failure: false
+
+secret_detection:
+  allow_failure: false
+
+nodejs-scan-sast:
+  allow_failure: false
+
+container_scanning:
+  rules:
+    - changes:
+        - public/**/*
+        - src/**/*
+        - data/**/*
+        - Dockerfile
+        - .dockerignore
+        - package.json
+  allow_failure: false
+  needs: ["build"]
+
+code_quality:
+  stage: test
+  services:
+  allow_failure: false
+  tags:
+    - cq-sans-dind1
+
+app_scan:
+  image: docker
+  stage: test
+  before_script:
+    - echo $CI_REGISTRY_PASSWORD | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
+  script:
+    - echo "Deploying docker image 🚀"
+    - docker pull $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:latest
+    - docker rm -f $ZAP_CTN_NAME || true
+    - docker run --name $ZAP_CTN_NAME -d -p 3002:3000 -e ENV=staging $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:latest
+    - echo $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:latest
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop"
+    - if: $CI_COMMIT_BRANCH == "main"
+
+zap_scan:
+  stage: test
+  image: owasp/zap2docker-stable
+  script:
+    - cd /zap/wrk
+    - zap-baseline.py -t $ZAP_URL -c gen.conf -r zap_report.html
+  after_script:
+    - echo "Copy report file to the artifact path..."
+    - cp /zap/wrk/zap_report.html .
+  artifacts:
+    when: always
+    paths:
+      - zap_report.html
+    expire_in: 1 week
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop"
+    - if: $CI_COMMIT_BRANCH == "main"
+  allow_failure: false
+  tags:
+    - owasp
+  needs: ["app_scan"]
+
+analyze_zap_report:
+  stage: review
+  image: node:latest
+  script:
+    - npm install jsdom
+    - node analyzeReport.mjs
+  artifacts:
+    when: on_failure
+    paths:
+      - zap_report.html
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop"
+    - if: $CI_COMMIT_BRANCH == "main"
+  needs:
+    - job: zap_scan
+      artifacts: true
+  allow_failure: false
+
+deploy-staging:
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop"
+  image: docker
+  stage: staging
+  before_script:
+    - echo $CI_REGISTRY_PASSWORD | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
+  script:
+    - echo "Deploying docker image 🚀"
+    - docker pull $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:latest
+    - docker rm -f $STAGING_CTN_NAME || true
+    - docker run --name $STAGING_CTN_NAME -d -p 3001:3000 -e ENV=staging $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:latest
+    - echo $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:latest
+  after_script:
+    - docker stop $ZAP_CTN_NAME
+    - docker rm $ZAP_CTN_NAME
+  environment:
+    name: staging
+    url: $STAGING_URL
+  needs:
+    [
+      "e2e-tests",
+      "code_quality",
+      "nodejs-scan-sast",
+      "secret_detection",
+      "semgrep-sast",
+      "analyze_zap_report",
+    ]
+
+pages:
+  stage: production
+  image: node:21.1.0-alpine
+  script:
+    - npm ci
+    - npm run build
+    - rm -rf public/*
+    - mv out/* public
+    - echo "Deploy to GitLab Pages 🚀"
+  artifacts:
+    paths:
+      - public
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
+      - .next/cache/
+  environment:
+    name: production
+    url: $PROD_URL
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+  needs:
+    [
+      "e2e-tests",
+      "code_quality",
+      "nodejs-scan-sast",
+      "secret_detection",
+      "semgrep-sast",
+      "analyze_zap_report",
+    ]
+  tags:
+    - node
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure

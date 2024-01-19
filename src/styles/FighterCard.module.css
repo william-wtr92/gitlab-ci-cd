@@ -1,0 +1,60 @@
+.card {
+  position: relative;
+  perspective: 500px;
+  font-family: inherit;
+  z-index: 9999;
+}
+
+.contentWrapper {
+  position: relative;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+  height: 100%;
+}
+
+.image , .content {
+  position: absolute;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 10px;
+  transition-duration: 500ms;
+}
+
+.image {
+  object-fit: cover;
+  object-position: top;
+  background-color: black;
+}
+
+.content {
+  display: flex; 
+  flex-direction: column;
+  justify-content:center;
+  align-items: center;
+  text-align: center;
+  background-color: black;
+  font-family: inherit;
+  font-style: italic;
+  color: white;
+  height: 100%;  
+  width: 100%;
+  transform: rotateY(180deg);
+}
+
+.name {
+  width: 80%;
+  font-size: 1.3rem;
+}
+
+.age,
+.record,
+.stance,
+.weight {
+  font-size: 1.1rem;
+}
+
+.card:hover > .contentWrapper {
+  transform: rotateY(180deg);
+}
+
+
